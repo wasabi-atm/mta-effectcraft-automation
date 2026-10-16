@@ -19,9 +19,18 @@ for a in "$@"; do case "$a" in
 
 say() { printf '\n== %s\n' "$*"; }
 
-# ---- system packages: ffmpeg (GIF encode), libegl1 (only for EEVEE/Workbench; Cycles needs none)
-if ! command -v ffmpeg >/dev/null 2>&1 && [ "$(id -u)" = 0 ] && command -v apt-get >/dev/null; then
-  say "apt: ffmpeg"; apt-get update -qq && apt-get install -y -qq ffmpeg
+# ---- system packages: ffmpeg (GIF encode), fonts-inter (Inter Display, the SF Pro Display stand-in)
+NEED=""
+command -v ffmpeg >/dev/null 2>&1 || NEED="$NEED ffmpeg"
+fc-list 2>/dev/null | grep -qi "Inter Display" || NEED="$NEED fonts-inter"
+if [ -n "$NEED" ]; then
+  if [ "$(id -u)" = 0 ] && command -v apt-get >/dev/null; then
+    say "apt:$NEED"; apt-get update -qq && apt-get install -y -qq $NEED
+  elif command -v brew >/dev/null; then
+    say "brew:$NEED"; for p in $NEED; do case $p in fonts-inter) brew install --cask font-inter ;; *) brew install "$p" ;; esac; done
+  else
+    echo "install these yourself:$NEED"
+  fi
 fi
 
 # ---- EffectCraft

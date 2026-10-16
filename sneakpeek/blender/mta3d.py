@@ -17,8 +17,12 @@ import os
 import bpy
 
 FONT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets", "fonts")
+# Same faces as lib_mta.jsx's MTA.F: Inter Display (fonts-inter) when installed, else the bundled Inter.
+DISPLAY = {"black": "InterDisplay-Black.otf", "heavy": "InterDisplay-ExtraBold.otf", "bold": "InterDisplay-Bold.otf",
+           "semi": "InterDisplay-SemiBold.otf", "med": "InterDisplay-Medium.otf", "reg": "InterDisplay-Regular.otf"}
 FONTS = {"black": "Inter-Bold.ttf", "heavy": "Inter-Bold.ttf", "bold": "Inter-Bold.ttf", "semi": "Inter-SemiBold.ttf",
          "med": "Inter-Medium.ttf", "reg": "Inter-Regular.ttf"}
+FONT_SEARCH = ["/usr/share/fonts/opentype/inter", os.path.expanduser("~/Library/Fonts"), "/Library/Fonts"]
 
 
 def _scene():
@@ -89,9 +93,16 @@ def mat(name, hex_color, metallic=0.0, roughness=0.35, emission=0.0, emission_he
 
 
 def _font(style):
-    path = os.path.join(FONT_DIR, FONTS.get(style, style))
-    if not os.path.exists(path):
-        path = style  # an absolute path to a brand font
+    """'semi' / 'black'... (Inter Display if installed, else bundled Inter) or a path to a brand font."""
+    path = None
+    if style in DISPLAY:
+        for d in FONT_SEARCH:
+            if os.path.exists(os.path.join(d, DISPLAY[style])):
+                path = os.path.join(d, DISPLAY[style])
+                break
+        path = path or os.path.join(FONT_DIR, FONTS[style])
+    else:
+        path = style
     key = os.path.abspath(path)
     for f in bpy.data.fonts:
         if f.filepath and os.path.abspath(bpy.path.abspath(f.filepath)) == key:

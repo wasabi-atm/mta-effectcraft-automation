@@ -223,7 +223,8 @@ def cmd_build(a):
                         "script.run", params, "--empty", "--save-as", proj, "--json"], capture_output=True, text=True, env=env)
     res = {}
     try:
-        steps = json.loads(r.stdout.strip().splitlines()[-1])
+        reply = json.loads(r.stdout.strip().splitlines()[-1])   # {"result": [{command, result}...], "saved": path}
+        steps = reply.get("result", reply) if isinstance(reply, dict) else reply
         res = next((st.get("result") or {} for st in steps if st.get("command") == "script.run"), {})
     except (ValueError, IndexError, AttributeError):
         pass

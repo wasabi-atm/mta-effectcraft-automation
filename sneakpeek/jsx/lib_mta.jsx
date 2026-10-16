@@ -2,8 +2,26 @@
 // No scene structure lives here: every company builds its own scene from these pieces. ES3 only (ExtendScript).
 var MTA = MTA || {};
 MTA.W = 1280; MTA.H = 720; MTA.FPS = 20; MTA.DUR = 5;
-MTA.F = { black: "SFProDisplay-Black", heavy: "SFProDisplay-Heavy", bold: "SFProDisplay-Bold", semi: "SFProDisplay-Semibold",
-          med: "SFProDisplay-Medium", reg: "SFProDisplay-Regular", round: "SFProRounded-Black", mono: "Menlo-Bold" };
+// EffectCraft port: SF Pro is macOS-only and an unknown name falls back to Inter *Regular*, which
+// silently flattens every weight. Inter Display (fonts-inter; scripts/setup.sh installs it) is the
+// closest open match to SF Pro Display. Inter (no "Display") is bundled with EffectCraft.
+MTA.F = { black: "InterDisplay-Black", heavy: "InterDisplay-ExtraBold", bold: "InterDisplay-Bold", semi: "InterDisplay-SemiBold",
+          med: "InterDisplay-Medium", reg: "InterDisplay-Regular", round: "InterDisplay-Black", mono: "JetBrainsMono-Regular" };
+// ROOT / BRAND / OUT3D / COMP are set by the sneakpeek runner (sneakpeek/cli.py) before scene.jsx runs.
+MTA.ROOT = MTA.ROOT || ""; MTA.BRAND = MTA.BRAND || ""; MTA.OUT3D = MTA.OUT3D || "";
+MTA.findComp = function (name) {
+    for (var i = 1; i <= app.project.numItems; i++) { var it = app.project.item(i); if (it instanceof CompItem && it.name === name) { return it; } }
+    return null;
+};
+// Import a rendered PNG sequence (a Blender pass: out/3d/<name>/f_0001.png...) as one footage item at the comp rate.
+MTA.sequence = function (comp, firstFrame, width, pos) {
+    var io = new ImportOptions(new File(firstFrame)); io.sequence = true;
+    var it = app.project.importFile(io); it.mainSource.conformFrameRate = MTA.FPS;
+    var l = comp.layers.add(it);
+    var s = (width || MTA.W) / it.width * 100; MTA.P(l, "scale").setValue([s, s]); MTA.P(l, "pos").setValue(pos || [MTA.W / 2, MTA.H / 2]);
+    l.name = "seq " + it.name;
+    return l;
+};
 
 MTA.hex = function (h) {
     h = String(h).replace("#", "");
@@ -328,7 +346,9 @@ MTA.sub = function (name, w, h, dur, bgHex) {
     c.motionBlur = true; c.shutterAngle = 180; c.shutterPhase = -90;
     return c;
 };
-// a 1280x720 comp on the Cinema 4D renderer: the only renderer where text/shape extrusion works
+// a 1280x720 comp on the Cinema 4D renderer: the only renderer where text/shape extrusion works.
+// EffectCraft has no Cinema 4D renderer (the comp stays Classic 3D) and no extrusion group, so
+// MTA.extrude3d throws there: build extruded type in a Blender pass (sneakpeek/blender/mta3d.py).
 MTA.ernst = function (name, dur) { var c = MTA.sub(name, MTA.W, MTA.H, dur); c.renderer = "ADBE Ernst"; return c; };
 MTA.tf = function (l, matchName) { return l.property("ADBE Transform Group").property(matchName); };
 // real extrusion + angular bevel on a text/shape layer inside an MTA.ernst comp; returns the transform group
