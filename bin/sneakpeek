@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# sneakpeek: run the pipeline CLI with the project venv (falls back to python3).
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PY="$ROOT/.venv/bin/python"; [ -x "$PY" ] || PY=python3
+exec "$PY" "$ROOT/sneakpeek/cli.py" "$@"
