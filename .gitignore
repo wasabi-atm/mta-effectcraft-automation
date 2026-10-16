@@ -1,0 +1,8 @@
+.tools/
+.venv
+.env
+__pycache__/
+*.pyc
+# per-scene renders (keep the GIF and contact sheet out of git too: they are hosted on ImageKit)
+**/out/
+*.blend1

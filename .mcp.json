@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "effectcraft": {
+      "command": ".tools/bin/effectcraft-cli",
+      "args": ["mcp", "--autosave"]
+    },
+    "blender": {
+      "command": ".venv/bin/python",
+      "args": ["blender_mcp/server.py"]
+    }
+  }
+}
