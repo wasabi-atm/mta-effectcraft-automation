@@ -5,7 +5,8 @@
 // C) 2.55-3.60  "Think different." (Apple's own line) over the traces
 // D) 3.55-3.95  the chip flares to white
 // E) 3.80-5.00  end card: the line, Apple's "Learn more" / "Buy" pills, apple.com
-// Look: black, #F5F5F7 type (Inter Display for SF Pro Display), system blue #0071E3 / link blue #2997FF.
+// Look: black, #F5F5F7 type (Inter Display for SF Pro Display). Pills as apple.com dark sections (main.built.css, 16 Oct):
+// .button #0071E3 / white, .button-secondary transparent with #2997FF text + border; 17px/400, -0.022em, 12px/22px padding.
 // No Apple logo (a trademark glyph we don't redraw), no product names, no claims.
 (function () {
     var BG = "#000000", INK = "#F5F5F7", GREY = "#86868B", BLUE = "#0071E3", LINK = "#2997FF";
@@ -111,8 +112,8 @@
     sheenMatte.moveBefore(sheen);
     sheen.setTrackMatte(sheenMatte, TrackMatteType.ALPHA);
 
-    var learn = MTA.button(c, { text: "Learn more", bg: BLUE, fg: "#ffffff", radius: 35, h: 70, padX: 36, font: MTA.F.reg, size: 29, pos: [640, 406] });
-    var buy = MTA.button(c, { text: "Buy", fg: LINK, border: LINK, borderW: 2.5, radius: 35, h: 70, padX: 34, font: MTA.F.reg, size: 29, pos: [640, 406] });
+    var learn = MTA.button(c, { text: "Learn more", bg: BLUE, fg: "#ffffff", radius: 37, h: 74, padX: 37, font: MTA.F.reg, size: 29, tracking: -22, pos: [640, 406] });
+    var buy = MTA.button(c, { text: "Buy", fg: LINK, border: LINK, borderW: 2.5, radius: 37, h: 74, padX: 37, font: MTA.F.reg, size: 29, tracking: -22, pos: [640, 406] });
     MTA.row([learn, buy], 640, 406, 22);
     var pills = [[learn, 4.28], [buy, 4.38]];
     for (var i = 0; i < pills.length; i++) {

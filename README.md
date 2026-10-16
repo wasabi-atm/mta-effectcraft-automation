@@ -12,8 +12,14 @@ Claude Code cloud session instead of on a Mac with After Effects open.
 | `run.sh` + `.ae-lock` + Lossless `.mov` | `sneakpeek run <scene>` (3D passes, build, render PNG frames, GIF, contact sheet) |
 | `gifmake.py`, `sheet.py`, `brand_extract.py` | the same tools, ported to read PNG frame folders |
 
-`sneakpeek/jsx/lib_mta.jsx` is the AE helper library unchanged: 32 of its 33 helpers run as-is in
-EffectCraft (`extrude3d` needs the Cinema 4D renderer, which EffectCraft lacks; use a Blender pass).
+`sneakpeek/jsx/lib_mta.jsx` is the AE helper library with one change (SF Pro names mapped to Inter
+Display): 32 of its 33 helpers run as-is in EffectCraft. `extrude3d` needs the Cinema 4D renderer,
+which EffectCraft lacks, so real extrusion is a Blender pass. Details in
+[docs/migration-from-after-effects.md](docs/migration-from-after-effects.md).
+
+Worked example: [`scenes/apple/`](scenes/apple/brief.md), a chip hero in Blender (brushed lid,
+gradient softbox, die floorplan, traces lit outward in Apple's system palette) composited in
+EffectCraft with an Apple-style end card.
 
 ## Setup
 
@@ -25,11 +31,17 @@ bin/sneakpeek doctor
 ## Use
 
 ```bash
-bin/sneakpeek run scenes/<company>      # 3d -> build -> render -> gif
-bin/sneakpeek host scenes/<company> --prefix eu1015 --csv media/sneakpeek-urls.csv
+bin/sneakpeek new scenes/<company>      # scaffold brief.md, scene.jsx, 3d/hero.py
+bin/sneakpeek brand concepts.csv scenes/_brand    # logo, CTA, colours from their site (Playwright)
+bin/sneakpeek run scenes/<company>      # 3d -> build -> render -> gif + contact sheet
+bin/sneakpeek host scenes/<company> --prefix eu1015 --domain acme.com --csv media/sneakpeek-urls.csv
 ```
+
+Claude sessions: start with the `/sneakpeek` skill (`.claude/skills/sneakpeek/SKILL.md`).
+
+Tests: `.venv/bin/python -m unittest discover -s tests -v` (EffectCraft and Blender tests skip when
+the tools are not installed).
 
 MCP servers for interactive work are in `.mcp.json`: `effectcraft` (headless) and `blender`
 (headless `bpy`).
 
-Status: work in progress. See the open pull request for what is done and what is next.

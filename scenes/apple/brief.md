@@ -15,25 +15,22 @@ One hero moment, shot like an Apple product film: a chip.
 | 3.55-3.95 s | The chip flares to white | EffectCraft |
 | 3.80-5.00 s | End card: "Think different." with a blue-to-pink shimmer, "Learn more" (filled) and "Buy" (outline) pills, apple.com, over a deeply blurred glow of the last 3D frame | EffectCraft |
 
-## Brand
+## Brand (checked on apple.com, 16 Oct 2026: homepage HTML and /v/homepage/a/styles/main.built.css)
 
 | Element | Value | Source |
 |---|---|---|
-| Background | `#000000` | Apple product pages (dark sections) |
+| Background | `#000000` | dark homepage tiles |
 | Type colour | `#F5F5F7` headline, `#86868B` secondary | apple.com text colours |
-| CTA | "Learn more" filled `#0071E3`, "Buy" outline `#2997FF`, pill radius | apple.com tile CTAs |
-| Type | SF Pro Display, stood in by **Inter Display** SemiBold / Regular | SF Pro is macOS-only and licensed for Apple platforms |
+| CTA labels | "Learn more" (9 on the homepage), "Buy" (2) | homepage tiles |
+| Primary pill | `.button`: `rgb(0, 113, 227)` `#0071E3`, white text | main.built.css |
+| Secondary pill (dark tiles) | `.button-dark.button-secondary`: transparent, text and border `rgb(41, 151, 255)` `#2997FF` | homepage.built.css |
+| Pill type | 17px, weight 400, letter-spacing -0.022em, padding 12px / 22px (scaled x1.7 for the 1280 comp) | main.built.css |
+| Type | SF Pro Display, stood in by **Inter Display** SemiBold / Regular | SF Pro is licensed for Apple platforms only |
 | Palette (traces, die, shimmer) | `#2997FF` `#7D7AFF` `#BF5AF2` `#FF375F` `#FF9F0A` | Apple system colours (blue, indigo, purple, pink, orange) |
-| Line | "Think different." | Apple's slogan (1997 campaign) |
+| Line | "Think different." | Apple's slogan (1997 campaign). Current homepage lines include "Pro further." (iPhone 18 Pro) and "Designed for life at home." (HomeView) |
 
 Not used, on purpose: the Apple logo (a trademark glyph we don't redraw in a public repo), product
 names, chip names and any performance claim.
-
-## To verify before this pattern is used on a real Apple pitch
-
-apple.com was not reachable from the cloud session (environment network policy), so the CTA labels
-and colours above come from Apple's long-standing site conventions, not from a live pull. Run
-`sneakpeek brand` against apple.com once the network allows it and replace anything that differs.
 
 ## Build
 

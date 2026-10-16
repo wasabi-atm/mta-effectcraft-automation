@@ -18,7 +18,7 @@ JS = r"""
       if (vis(el) && r.top < 160 && r.left < 700 && r.width >= 40 && r.height >= 12 && r.width < 420) { logo = el; break; } } if (logo) break; }
   let logoBox = null; if (logo) { const r = logo.getBoundingClientRect(); logoBox = {x: r.x, y: r.y, w: r.width, h: r.height, bg: bgOf(logo)}; logo.setAttribute('data-mta-logo', '1'); }
   // CTA: header first, then hero
-  const re = /(book a demo|request a demo|get a demo|see a demo|schedule a demo|get started|start free|start for free|try .* free|try for free|sign up|talk to sales|contact sales|get a quote|request a quote|book a call|talk to us|demo)/i;
+  const re = /(book a demo|request a demo|get a demo|see a demo|schedule a demo|get started|start free|start for free|try .* free|try for free|sign up|talk to sales|contact sales|get a quote|request a quote|book a call|talk to us|demo|learn more|buy|pre-order|order now|shop now|shop|subscribe|join now)/i;
   const cands = [...document.querySelectorAll('a, button')].filter(el => vis(el) && re.test((el.innerText || '').trim()) && (el.innerText || '').trim().length < 32);
   const score = el => { const s = getComputedStyle(el); const bg = s.backgroundColor; const filled = bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent'; const r = el.getBoundingClientRect(); return (filled ? 10 : 0) + (r.top < 140 ? 3 : 0) + (r.top < 800 ? 1 : 0); };
   cands.sort((a, b) => score(b) - score(a));
@@ -65,12 +65,21 @@ def key_out(path):
     return "#%02x%02x%02x" % bg
 
 
+def chromium_path():
+    """$CHROMIUM_PATH, else a preinstalled browser whose build may not match this Playwright version
+    (cloud containers ship one at /opt/pw-browsers/chromium), else Playwright's own download (None)."""
+    for c in (os.environ.get("CHROMIUM_PATH"), "/opt/pw-browsers/chromium"):
+        if c and os.path.exists(c):
+            return c
+    return None
+
+
 def main():
     concepts, out = sys.argv[1], sys.argv[2]
     only = set(sys.argv[3:])
     rows = list(csv.DictReader(open(concepts)))
     with sync_playwright() as p:
-        b = p.chromium.launch(args=["--hide-scrollbars"])
+        b = p.chromium.launch(args=["--hide-scrollbars"], executable_path=chromium_path())
         for r in rows:
             d = r["Domain"]
             if only and d not in only:
