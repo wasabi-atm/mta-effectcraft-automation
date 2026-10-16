@@ -46,7 +46,7 @@ def principled(name, base, metallic=0.0, rough=0.4, coat=0.0, coat_rough=0.05):
     return m, p
 
 
-def brushed(name, base, rough_lo=0.16, rough_hi=0.34, scale=(1.0, 260.0, 1.0), bump=0.04):
+def brushed(name, base, rough_lo=0.16, rough_hi=0.34, scale=(1.0, 260.0, 1.0), bump=0.03):
     """Brushed metal: noise stretched along one axis drives roughness and a fine bump."""
     m, p = principled(name, base, metallic=1.0)
     nt = m.node_tree
@@ -179,7 +179,7 @@ def board_material():
     m, p = principled("board", "#06070a", rough=0.62)
     nt = m.node_tree
     nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 180.0
-    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.08
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.025   # fine grain costs GIF bytes
     nt.links.new(nz.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], p.inputs["Normal"])
     return m
 
@@ -371,7 +371,8 @@ def area(name, loc, size, energy, hexc="#ffffff", shape="RECTANGLE", sy=None, ai
 
 
 area("key", (-3.5, -3.0, 6.0), 6.0, 520)
-area("rim", (0.0, 6.0, 1.6), 5.0, 380, "#dfe8ff", sy=0.4, aim=(0, 0, 0.2))
+# rim: low and soft. It sits in the mirror direction of the mid-move camera, so a hot one clips the die
+area("rim", (0.0, 6.0, 1.6), 5.0, 120, "#dfe8ff", sy=1.0, aim=(0, 0, 0.2))
 area("fill", (5.0, -4.5, 1.2), 3.0, 60, "#ffe8d8")
 # gradient softbox behind and above the chip, seen only in reflections (camera ray off): the lid and
 # the black glass die pick up a soft bright-to-black gradient from the final three-quarter view.
@@ -414,11 +415,11 @@ def softbox(name, loc, size, peak, aim=(0, 0, 0.2)):
 
 
 softbox("softbox", (0.0, 9.5, 8.0), (11.0, 5.0), 2.6)
-sweep = area("sweep", (-7.0, -1.0, 4.2), 9.0, 2200, "#ffffff", sy=0.12, aim=(0, 0, 0.2))
+sweep = area("sweep", (-7.0, -1.0, 4.2), 9.0, 1600, "#ffffff", sy=0.12, aim=(0, 0, 0.2))
 sweep.constraints.clear()
 sweep.rotation_euler = (math.radians(14), 0, math.radians(90))
 M.key(sweep, "location", [[0.0, (-6.5, -1.2, 4.2)], [1.9, (6.5, -1.2, 4.2)]], "inout")
-M.key(sweep.data, "energy", [[0.0, 0.0], [0.25, 2200.0], [1.7, 2200.0], [2.1, 300.0]], "lin")
+M.key(sweep.data, "energy", [[0.0, 0.0], [0.25, 1600.0], [1.6, 1600.0], [2.0, 200.0]], "lin")
 
 
 # ------------------------------------------------------------------ camera

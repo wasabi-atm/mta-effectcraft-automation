@@ -19,9 +19,10 @@ for a in "$@"; do case "$a" in
 
 say() { printf '\n== %s\n' "$*"; }
 
-# ---- system packages: ffmpeg (GIF encode), fonts-inter (Inter Display, the SF Pro Display stand-in)
+# ---- system packages: ffmpeg + gifsicle (GIF encode and size budget), fonts-inter (Inter Display, the SF Pro Display stand-in)
 NEED=""
 command -v ffmpeg >/dev/null 2>&1 || NEED="$NEED ffmpeg"
+command -v gifsicle >/dev/null 2>&1 || NEED="$NEED gifsicle"
 fc-list 2>/dev/null | grep -qi "Inter Display" || NEED="$NEED fonts-inter"
 if [ -n "$NEED" ]; then
   if [ "$(id -u)" = 0 ] && command -v apt-get >/dev/null; then

@@ -111,6 +111,7 @@ def cmd_doctor(_a):
     py, ver = blender_python()
     line(bool(py), "blender", f"bpy {ver} via {py}" if py else "no Python with `import bpy`: run scripts/setup.sh (pip install bpy, Python 3.13)")
     line(bool(shutil.which("ffmpeg")), "ffmpeg", shutil.which("ffmpeg") or "missing (apt-get install ffmpeg)")
+    line(True if shutil.which("gifsicle") else None, "gifsicle", shutil.which("gifsicle") or "not installed: GIFs fall back to 15 fps sooner to fit 2.2 MB")
     try:
         import PIL
         line(True, "pillow", PIL.__version__)

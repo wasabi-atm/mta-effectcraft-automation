@@ -4,7 +4,8 @@
 Input is a folder of PNG frames (what `effectcraft-cli render --format png` writes) or any video
 ffmpeg reads. A temporal hold keeps pixels that changed by <= T per channel from the previous
 frame, so the GIF encoder can reuse them (renderers dither by +-1 per frame, which otherwise
-makes every frame a full frame). Then a palette ladder steps down until the file fits.
+makes every frame a full frame). Then a ladder steps down until the file fits: palette, gifsicle lossy LZW
+(when installed), fewer colours, and only then 15 fps.
 
 Usage: gifmake.py <frames_dir | video> <out.gif> [max_mb] [--fps 20] [--width 640]
 """
@@ -17,7 +18,10 @@ import tempfile
 from PIL import Image, ImageChops
 
 T = 5  # per-channel change at or below this counts as noise
-LADDER = [(20, 128, 4), (20, 96, 4), (20, 96, "none"), (20, 64, "none"), (15, 64, "none")]
+# (fps, colours, dither, gifsicle lossy). Quality first: full frame rate and palette, then lossy LZW
+# (gifsicle, when installed), then fewer colours, and only then fewer frames.
+LADDER = [(20, 128, 4, 0), (20, 128, 4, 60), (20, 96, "none", 80), (20, 96, "none", 120), (20, 64, "none", 120),
+          (15, 96, "none", 80), (15, 64, "none", 120), (15, 64, "none", 200)]
 
 
 def _frames(src_dir):
@@ -68,6 +72,16 @@ def encode(frames_dir, out, fps, colors, dither):
     return os.path.getsize(out) / 1e6
 
 
+def lossy(path, level):
+    """gifsicle -O3 --lossy=level in place; returns False when gifsicle isn't installed."""
+    if not level or not shutil.which("gifsicle"):
+        return False
+    tmp = path + ".lossy.gif"
+    subprocess.run(["gifsicle", "-O3", f"--lossy={level}", "-o", tmp, path], check=True)
+    os.replace(tmp, path)
+    return True
+
+
 def make_gif(src, out, max_mb=2.2, fps=20, width=640, height=360):
     tmp = tempfile.mkdtemp(prefix="gifmake_")
     raw, held = os.path.join(tmp, "raw"), os.path.join(tmp, "held")
@@ -77,7 +91,10 @@ def make_gif(src, out, max_mb=2.2, fps=20, width=640, height=360):
         extract(src, raw, width, height, fps)
         n = hold(raw, held)
         tried, mb = [], 0.0
-        for lfps, colors, dither in LADDER:
+        has_gifsicle = bool(shutil.which("gifsicle"))
+        for lfps, colors, dither, lossy_level in LADDER:
+            if lossy_level and not has_gifsicle:
+                continue
             lfps = min(lfps, fps)
             frames = held
             if lfps < fps:  # drop frames evenly (20 -> 15 keeps 3 of every 4)
@@ -90,7 +107,9 @@ def make_gif(src, out, max_mb=2.2, fps=20, width=640, height=360):
                         j += 1
                         shutil.copy(os.path.join(held, f), os.path.join(frames, "%04d.png" % j))
             mb = encode(frames, out, lfps, colors, dither)
-            tried.append(f"{lfps}fps/{colors}c/{dither}={mb:.2f}MB")
+            if lossy(out, lossy_level):
+                mb = os.path.getsize(out) / 1e6
+            tried.append(f"{lfps}fps/{colors}c/{dither}" + (f"/L{lossy_level}" if lossy_level else "") + f"={mb:.2f}MB")
             if mb <= max_mb:
                 break
         return {"out": out, "frames": n, "mb": round(mb, 2), "tried": tried, "fits": mb <= max_mb}
