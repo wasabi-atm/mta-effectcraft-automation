@@ -83,3 +83,6 @@ the source has settled there, so a slow fade into a light end card leaves no gho
 stripes); that costs about 0.2-0.3 MB per GIF. What blows the budget: animated
 fractal noise backgrounds, full-frame grain, constant camera motion over textured surfaces. Black
 backgrounds and play-then-hold beats keep it small.
+Before the global palette, the ladder gives each of 3 segments (cut at the biggest frame-to-frame
+changes, joined by gifsicle) its own palette so soft glows don't band. A held pixel is refreshed
+once the source settles, so a slow dissolve into a light end card leaves no ghost.
