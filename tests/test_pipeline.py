@@ -14,7 +14,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "sneakpeek"))
 
 import cli  # noqa: E402
-from gifmake import make_gif  # noqa: E402
+from gifmake import hold, make_gif  # noqa: E402
 from sheet import make_sheet  # noqa: E402
 
 try:
@@ -52,6 +52,20 @@ class GifTests(unittest.TestCase):
         im = Image.open(out)
         self.assertEqual(im.size, (640, 360))
         self.assertEqual(r["frames"], 24)
+
+    def test_hold_refreshes_slow_fade(self):
+        # a white card fading into a #F6F6F6 end card by <= T a frame used to stay frozen as a ghost
+        src, dst = os.path.join(self.tmp, "raw"), os.path.join(self.tmp, "held")
+        os.makedirs(src)
+        os.makedirs(dst)
+        for i in range(40):
+            v = 255 - round(9 * min(i / 30, 1))
+            im = Image.new("RGB", (64, 36), "#F6F6F6")
+            ImageDraw.Draw(im).rectangle([16, 8, 48, 28], fill=(v, v, v))
+            im.save(os.path.join(src, "%04d.png" % (i + 1)))
+        self.assertEqual(hold(src, dst), 40)
+        last = Image.open(os.path.join(dst, "0040.png")).convert("RGB")
+        self.assertEqual(last.getpixel((32, 18)), (246, 246, 246))
 
     def test_sheet_from_frames(self):
         src = frames(os.path.join(self.tmp, "frames"), n=100)

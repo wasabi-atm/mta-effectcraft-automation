@@ -78,6 +78,8 @@ by every contact there.
 ## GIF size
 
 Budget 2.2 MB at 640x360, 20 fps. `gifmake.py` holds sub-threshold pixel changes (renderers dither
-by +-1 per frame) and ladders 128 -> 64 colours, then 15 fps. What blows the budget: animated
+by +-1 per frame) and ladders 128 -> 64 colours, then 15 fps. The hold refreshes a held pixel once
+the source has settled there, so a slow fade into a light end card leaves no ghost (card outline,
+stripes); that costs about 0.2-0.3 MB per GIF. What blows the budget: animated
 fractal noise backgrounds, full-frame grain, constant camera motion over textured surfaces. Black
 backgrounds and play-then-hold beats keep it small.

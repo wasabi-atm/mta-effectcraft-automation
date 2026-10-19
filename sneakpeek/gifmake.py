@@ -43,20 +43,30 @@ def extract(src, raw_dir, width, height, fps):
     return len(_frames(raw_dir))
 
 
+def _maxdiff(a, b):
+    r, g, b2 = ImageChops.difference(a, b).split()
+    return ImageChops.lighter(ImageChops.lighter(r, g), b2)
+
+
 def hold(src_dir, dst_dir):
-    prev = None
+    """Keep the previous output pixel where the change is noise. A held pixel is refreshed once the
+    source has settled there (raw frame-to-frame change <= 1) but still differs from the held value by
+    more than 2: otherwise a slow change of <= T (a light card dissolving into a light end card) stays
+    frozen as a ghost for the rest of the GIF."""
+    prev = raw_prev = None
     files = _frames(src_dir)
     for f in files:
         cur = Image.open(os.path.join(src_dir, f)).convert("RGB")
         if prev is None:
             out = cur
         else:
-            r, g, b = ImageChops.difference(cur, prev).split()
-            m = ImageChops.lighter(ImageChops.lighter(r, g), b)
-            mask = m.point(lambda v: 255 if v <= T else 0)  # 255 = keep previous pixel
+            near = _maxdiff(cur, prev).point(lambda v: 255 if v <= T else 0)          # 255 = within noise of held
+            stale = ImageChops.multiply(_maxdiff(cur, raw_prev).point(lambda v: 255 if v <= 1 else 0),
+                                        _maxdiff(cur, prev).point(lambda v: 255 if v > 2 else 0))
+            mask = ImageChops.subtract(near, stale)                                     # 255 = keep previous pixel
             out = Image.composite(prev, cur, mask)
         out.save(os.path.join(dst_dir, f))
-        prev = out
+        prev, raw_prev = out, cur
     return len(files)
 
 
