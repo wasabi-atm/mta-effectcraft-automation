@@ -81,3 +81,6 @@ Budget 2.2 MB at 640x360, 20 fps. `gifmake.py` holds sub-threshold pixel changes
 by +-1 per frame) and ladders 128 -> 64 colours, then 15 fps. What blows the budget: animated
 fractal noise backgrounds, full-frame grain, constant camera motion over textured surfaces. Black
 backgrounds and play-then-hold beats keep it small.
+Before the global palette, the ladder gives each of 3 segments (cut at the biggest frame-to-frame
+changes, joined by gifsicle) its own palette so soft glows don't band. A held pixel is refreshed
+once the source settles, so a slow dissolve into a light end card leaves no ghost.
